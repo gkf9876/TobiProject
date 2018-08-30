@@ -1,5 +1,6 @@
 package springbook.user.service;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -50,10 +51,10 @@ public class UserServiceTest {
 	MailSender mailSender;
 	
 	@Autowired
-	UserServiceImpl userServiceImpl;
+	ApplicationContext context;
 	
 	@Autowired
-	ApplicationContext context;
+	UserService testUserService;
 	
 	List<User> users;
 	
@@ -123,12 +124,8 @@ public class UserServiceTest {
 			assertThat(userUpdate.getLevel(), is(user.getLevel()));
 	}
 	
-	static class TestUserService extends UserServiceImpl{
-		private String id;
-		
-		private TestUserService(String id) {
-			this.id = id;
-		}
+	static class TestUserServiceImpl extends UserServiceImpl{
+		private String id = "madnite1";
 		
 		protected void upgradeLevel(User user) {
 			if(user.getId().equals(this.id))
@@ -143,22 +140,13 @@ public class UserServiceTest {
 	@Test
 	@DirtiesContext
 	public void upgradeAllOrNothing() throws Exception {
-		UserServiceImpl testUserService = new TestUserService(users.get(3).getId());
-		testUserService.setUserDao(this.userDao);
-		testUserService.setMailSender(this.mailSender);
-		
-		ProxyFactoryBean txProxyFactoryBean = context.getBean("&userService", ProxyFactoryBean.class);
-		txProxyFactoryBean.setTarget(testUserService);
-		
-		UserService txUserService = (UserService)txProxyFactoryBean.getObject();
-		
 		userDao.deleteAll();
 		
 		for(User user : users)
 			userDao.add(user);
 		
 		try {
-			txUserService.upgradeLevels();
+			this.testUserService.upgradeLevels();
 			fail("TestUserServiceException expected");
 		}catch(TestUserServiceException e) {
 		}
@@ -249,5 +237,10 @@ public class UserServiceTest {
 		List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
 		assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
 		assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
+	}
+	
+	@Test
+	public void advisorAutoProxyCreator() {
+		assertThat(testUserService, instanceOf(java.lang.reflect.Proxy.class));
 	}
 }
