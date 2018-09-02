@@ -124,7 +124,7 @@ public class UserServiceTest {
 			assertThat(userUpdate.getLevel(), is(user.getLevel()));
 	}
 	
-	static class TestUserServiceImpl extends UserServiceImpl{
+	static class TestUserService extends UserServiceImpl{
 		private String id = "madnite1";
 		
 		protected void upgradeLevel(User user) {

@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+			http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+			http://www.springframework.org/schema/aop
+			http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+			http://www.springframework.org/schema/tx
+			http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 			
 	<bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
 		<property name="driverClass" value="com.mysql.jdbc.Driver"/>
@@ -26,21 +32,18 @@
 		<property name="mailSender" ref="mailSender"/>
 	</bean>
 	
-	<bean id="transactionAdvice" class="springbook.user.service.TransactionAdvice">
-		<property name="transactionManager" ref="transactionManager"/>
-	</bean>
+	<aop:config>
+		<aop:advisor advice-ref="transactionAdvice" pointcut="execution(* *..*ServiceImpl..upgrade*(..))"/>
+	</aop:config>
 	
-	<bean id="transactionPointcut" class="springbook.learningtest.jdk.proxy.NameMatchClassMethodPointcut">
-		<property name="mappedClassName" value="*ServiceImpl"/>
-		<property name="mappedName" value="upgrade*"/>
-	</bean>
+	<tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="get*" propagation="REQUIRED" read-only="true" timeout="30"/>
+			<tx:method name="upgrade*" propagation="REQUIRES_NEW" isolation="SERIALIZABLE"/>
+			<tx:method name="*" propagation="REQUIRED"/>
+		</tx:attributes>
+	</tx:advice>
 	
-	<bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
-		<property name="advice" ref="transactionAdvice"/>
-		<property name="pointcut" ref="transactionPointcut"/>
-	</bean>
+	<bean id="testUserService" class="springbook.user.service.UserServiceTest$TestUserService" parent="userService"/>
 	
-	<bean class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"/>
-	
-	<bean id="testUserService" class="springbook.user.service.UserServiceTest$TestUserServiceImpl" parent="userService"/>
 </beans>
