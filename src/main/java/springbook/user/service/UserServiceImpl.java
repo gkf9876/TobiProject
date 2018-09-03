@@ -4,10 +4,6 @@ import java.util.List;
 
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import springbook.user.dao.UserDao;
 import springbook.user.domain.Level;
@@ -73,5 +69,21 @@ public class UserServiceImpl implements UserService{
 		mailMessage.setText("사용자님의 등급이 " + user.getLevel().name());
 		
 		this.mailSender.send(mailMessage);
+	}
+
+	public User get(String id) {
+		return userDao.get(id);
+	}
+
+	public List<User> getAll() {
+		return userDao.getAll();
+	}
+
+	public void deleteAll() {
+		userDao.deleteAll();
+	}
+
+	public void update(User user) {
+		userDao.update(user);
 	}
 }
