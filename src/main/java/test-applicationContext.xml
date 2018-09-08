@@ -29,8 +29,20 @@
 		<property name="sqlService" ref="sqlService"/>
 	</bean>
 	
-	<bean id="sqlService" class="springbook.user.sqlservice.XmlSqlService">
+	<bean id="sqlService" class="springbook.user.sqlservice.OxmSqlService">
+		<property name="unmarshaller" ref="unmarshaller"/>
+		<property name="sqlRegistry" ref="sqlRegistry"/>
+	</bean>
+	
+	<bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="contextPath" value="springbook.user.sqlservice.jaxb"/>
+	</bean>
+	
+	<bean id="sqlReader" class="springbook.user.sqlservice.JaxbXmlSqlReader">
 		<property name="sqlmapFile" value="sqlmap.xml"/>
+	</bean>
+	
+	<bean id="sqlRegistry" class="springbook.user.sqlservice.updatable.ConcurrentHashMapSqlRegistry">
 	</bean>
 	
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
