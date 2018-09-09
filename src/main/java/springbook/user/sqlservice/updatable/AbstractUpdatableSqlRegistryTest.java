@@ -13,26 +13,28 @@ import springbook.issuetracker.sqlservice.SqlUpdateFailureException;
 import springbook.issuetracker.sqlservice.UpdatableSqlRegistry;
 import springbook.user.sqlservice.SqlNotFoundException;
 
-public class ConcurrentHashMapSqlRegistryTest {
+public abstract class AbstractUpdatableSqlRegistryTest {
 	UpdatableSqlRegistry sqlRegistry;
 	
 	@Before
 	public void setUp() {
-		sqlRegistry = new ConcurrentHashMapSqlRegistry();
+		sqlRegistry = createUpdatableSqlRegistry();
 		sqlRegistry.registerSql("KEY1", "SQL1");
 		sqlRegistry.registerSql("KEY2", "SQL2");
 		sqlRegistry.registerSql("KEY3", "SQL3");
 	}
-	
-	@Test
-	public void find() {
-		checkFindResult("SQL1", "SQL2", "SQL3");
-	}
 
-	private void checkFindResult(String expected1, String expected2, String expected3) {
+	abstract protected UpdatableSqlRegistry createUpdatableSqlRegistry();
+	
+	protected void checkFind(String expected1, String expected2, String expected3) {
 		assertThat(sqlRegistry.findSql("KEY1"), is(expected1));
 		assertThat(sqlRegistry.findSql("KEY2"), is(expected2));
 		assertThat(sqlRegistry.findSql("KEY3"), is(expected3));
+	}
+	
+	@Test
+	public void find() {
+		checkFind("SQL1", "SQL2", "SQL3");
 	}
 	
 	@Test(expected=SqlNotFoundException.class)
@@ -43,7 +45,7 @@ public class ConcurrentHashMapSqlRegistryTest {
 	@Test
 	public void updateSingle() {
 		sqlRegistry.updateSql("KEY2", "Modified2");
-		checkFindResult("SQL1", "Modified2", "SQL3");
+		checkFind("SQL1", "Modified2", "SQL3");
 	}
 	
 	@Test
@@ -53,7 +55,7 @@ public class ConcurrentHashMapSqlRegistryTest {
 		sqlmap.put("KEY3", "Modified3");
 		
 		sqlRegistry.updateSql(sqlmap);
-		checkFindResult("Modified1", "SQL2", "Modified3");
+		checkFind("Modified1", "SQL2", "Modified3");
 	}
 	
 	@Test(expected=SqlUpdateFailureException.class)

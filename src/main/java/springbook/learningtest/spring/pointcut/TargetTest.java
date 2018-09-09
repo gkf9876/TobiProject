@@ -4,13 +4,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.aop.aspectj.AspectJExpressionPointcut;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/test-applicationContext.xml")
 public class TargetTest {
 	@Test
 	public void methodSignaturePointcut() throws SecurityException, NoSuchMethodException{
